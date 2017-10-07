@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 import com.polidea.rxandroidble.RxBleClient;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import javax.inject.Singleton;
 
@@ -33,4 +34,5 @@ public class AppModule {
     public RxBleClient providesRxBleClient() {
         return RxBleClient.create(application);
     }
+
 }

@@ -1,5 +1,6 @@
 package com.ab.ble;
 
+import android.Manifest;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -17,6 +18,7 @@ import android.view.View;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.RxBleDevice;
 import com.polidea.rxandroidble.RxBleScanResult;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import javax.inject.Inject;
 
@@ -27,32 +29,42 @@ import rx.android.schedulers.AndroidSchedulers;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final String PERMISSION_TAG = "RxPermissions";
     private static final String BLE_TAG = "RxBleClient";
     private static final String TAG = MainActivity.class.getSimpleName();
 
     @Inject
     RxBleClient rxBleClient;
-
+    RxPermissions rxPermissions;
     Subscription flowSubscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // rx permissions init
+        rxPermissions = new RxPermissions(this);
+        rxPermissions.setLogging(true);
+
         setContentView(R.layout.activity_main);
+
+        // dagger
         ((BleApplication) getApplication()).getAppComponent().inject(this);
 
+        // toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // fab
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+
             }
         });
 
+        // drawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -178,6 +190,8 @@ public class MainActivity extends AppCompatActivity
                 // basically no functionality will work here
             case LOCATION_PERMISSION_NOT_GRANTED:
                 // scanning and connecting will not work
+                rxPermissions.request(Manifest.permission.ACCESS_COARSE_LOCATION)
+                        .subscribe(this::onPermissionChanged);
             case BLUETOOTH_NOT_ENABLED:
                 // scanning and connecting will not work
             case LOCATION_SERVICES_NOT_ENABLED:
@@ -195,6 +209,15 @@ public class MainActivity extends AppCompatActivity
 
     private void onScanError(Throwable throwable) {
         Log.i(BLE_TAG, "Error ");
+    }
+
+    private void onPermissionChanged(Boolean granted) {
+        Log.i(PERMISSION_TAG, "Permissions" + (granted ? "" : " not") + " Granted");
+        if (granted) {
+            // All requested permissions are granted
+        } else {
+            // At least one permission is denied
+        }
     }
 
 }
