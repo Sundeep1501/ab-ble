@@ -1,25 +1,8 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-    }
-
-    dependencies {
-        // Retrolambda
-        classpath 'me.tatarka:gradle-retrolambda:3.6.0'
-    }
-}
-
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
-
-repositories {
-    mavenCentral()
-    jcenter()
-}
 
 android {
     compileSdkVersion 26
