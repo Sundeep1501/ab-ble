@@ -7,7 +7,6 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -16,6 +15,7 @@ import android.view.View;
 
 import com.ab.ble.model.datamngr.DataManager;
 import com.ab.ble.presenter.MainPresenter;
+import com.ab.ble.view.BaseActivity;
 import com.ab.ble.view.MainMvpView;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.RxBleDevice;
@@ -28,7 +28,7 @@ import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
         implements MainMvpView, NavigationView.OnNavigationItemSelectedListener {
 
     private static final String PERMISSION_TAG = "RxPermissions";
@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
     }
 
     @Override
@@ -176,7 +177,6 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
 
     @Override
     public void scanForBle() {
