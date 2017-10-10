@@ -4,7 +4,6 @@ import android.Manifest;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -15,6 +14,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.ab.ble.model.datamngr.DataManager;
+import com.ab.ble.presenter.MainPresenter;
+import com.ab.ble.view.MainMvpView;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.RxBleDevice;
 import com.polidea.rxandroidble.RxBleScanResult;
@@ -27,7 +29,7 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements MainMvpView, NavigationView.OnNavigationItemSelectedListener {
 
     private static final String PERMISSION_TAG = "RxPermissions";
     private static final String BLE_TAG = "RxBleClient";
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity
     RxBleClient rxBleClient;
     RxPermissions rxPermissions;
     Subscription flowSubscription;
+    MainPresenter mMainPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +50,10 @@ public class MainActivity extends AppCompatActivity
         rxPermissions.setLogging(true);
 
         setContentView(R.layout.activity_main);
+
+        DataManager dataManager = ((BleApplication) getApplication()).getDataManager();
+        mMainPresenter = new MainPresenter(dataManager);
+        mMainPresenter.onAttach(this);
 
         // dagger
         ((BleApplication) getApplication()).getAppComponent().inject(this);
@@ -79,12 +86,7 @@ public class MainActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         Log.i(TAG, "onStart");
-        flowSubscription = rxBleClient.observeStateChanges()
-                .startWith(rxBleClient.getState())
-                .switchMap(this::getObservableForStateChange)
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnUnsubscribe(this::clearSubscription)
-                .subscribe(this::onDeviceFound, this::onScanError);
+        mMainPresenter.decideAutoScan();
     }
 
     @Override
@@ -175,6 +177,18 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+
+    @Override
+    public void scanForBle() {
+        flowSubscription = rxBleClient.observeStateChanges()
+                .startWith(rxBleClient.getState())
+                .switchMap(this::getObservableForStateChange)
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnUnsubscribe(this::clearSubscription)
+                .subscribe(this::onDeviceFound, this::onScanError);
+    }
+
+
     private void clearSubscription() {
         Log.i(BLE_TAG, "Unsubscribed");
         flowSubscription = null;
@@ -219,5 +233,4 @@ public class MainActivity extends AppCompatActivity
             // At least one permission is denied
         }
     }
-
 }
