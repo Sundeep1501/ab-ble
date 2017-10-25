@@ -1,39 +1,27 @@
 package com.ab.ble;
 
 import android.app.Application;
+import android.content.Context;
 
-import com.ab.ble.dagger.AppComponent;
-import com.ab.ble.dagger.AppModule;
-import com.ab.ble.dagger.DaggerAppComponent;
-import com.ab.ble.model.SharedPrefsHelper;
-import com.ab.ble.model.datamngr.DataManager;
+import com.ab.ble.data.local.SharedPrefsHelper;
+import com.ab.ble.repository.SPRepository;
 
 /**
  * Created by sunde_000 on 05/10/2017.
  */
 
 public class BleApplication extends Application {
-    DataManager dataManager;
-    public AppComponent appComponent;
-
-    AppComponent getAppComponent() {
-        return appComponent;
-    }
-
-    protected AppComponent initDagger(BleApplication application) {
-        return DaggerAppComponent.builder()
-                .appModule(new AppModule(application))
-                .build();
-    }
+    private SPRepository SPRepository;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        appComponent = initDagger(this);
-        dataManager = new DataManager(new SharedPrefsHelper(getApplicationContext()));
+        Context context = getApplicationContext();
+        SPRepository = new SPRepository(new SharedPrefsHelper(context));
     }
 
-    public DataManager getDataManager() {
-        return dataManager;
+    public SPRepository getSPRepository() {
+        return SPRepository;
     }
+
 }

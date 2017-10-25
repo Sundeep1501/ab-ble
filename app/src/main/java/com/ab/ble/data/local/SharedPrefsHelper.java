@@ -1,4 +1,4 @@
-package com.ab.ble.model;
+package com.ab.ble.data.local;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -10,7 +10,7 @@ public class SharedPrefsHelper {
     private static final String MY_PREFS = "BLE_PREFS";
 
     private static final String CONTINUOUS_SCAN = "CONTINUOUS_SCAN";
-    private static final String MANUAL_SECONDS = "MANUAL_SECONDS";
+    private static final String SCAN_TIME = "SCAN_TIME";
 
     private SharedPreferences mSharedPreferences;
 
@@ -22,12 +22,12 @@ public class SharedPrefsHelper {
         mSharedPreferences.edit().clear().apply();
     }
 
-    public void putManualSecs(int secs) {
-        mSharedPreferences.edit().putInt(MANUAL_SECONDS, secs).apply();
+    public void setScanTime(int secs) {
+        mSharedPreferences.edit().putInt(SCAN_TIME, secs).apply();
     }
 
-    public int getManualSecs() {
-        return mSharedPreferences.getInt(MANUAL_SECONDS, 2);
+    public int getScanTime() {
+        return mSharedPreferences.getInt(SCAN_TIME, 2);
     }
 
     public boolean isContinuousScan() {

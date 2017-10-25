@@ -1,45 +1,42 @@
-package com.ab.ble;
+package com.ab.ble.view;
 
 import android.Manifest;
+import android.arch.lifecycle.LifecycleRegistry;
+import android.arch.lifecycle.LifecycleRegistryOwner;
+import android.arch.lifecycle.ViewModelProviders;
+import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
-import com.ab.ble.model.datamngr.DataManager;
-import com.ab.ble.presenter.MainPresenter;
-import com.ab.ble.view.BaseActivity;
-import com.ab.ble.view.MainMvpView;
+import com.ab.ble.R;
+import com.ab.ble.veiwmodel.MainViewModel;
 import com.polidea.rxandroidble.RxBleClient;
-import com.polidea.rxandroidble.RxBleDevice;
-import com.polidea.rxandroidble.RxBleScanResult;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
-import javax.inject.Inject;
-
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-
-public class MainActivity extends BaseActivity
-        implements MainMvpView, NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity
+        implements LifecycleRegistryOwner, NavigationView.OnNavigationItemSelectedListener {
 
     private static final String PERMISSION_TAG = "RxPermissions";
-    private static final String BLE_TAG = "RxBleClient";
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    @Inject
-    RxBleClient rxBleClient;
-    RxPermissions rxPermissions;
-    Subscription flowSubscription;
-    MainPresenter mMainPresenter;
+    private final LifecycleRegistry lifecycleRegistry = new LifecycleRegistry(this);
+
+    private MainViewModel mViewModel;
+
+    private RxPermissions rxPermissions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,19 +48,12 @@ public class MainActivity extends BaseActivity
 
         setContentView(R.layout.activity_main);
 
-        DataManager dataManager = ((BleApplication) getApplication()).getDataManager();
-        mMainPresenter = new MainPresenter(dataManager);
-        mMainPresenter.onAttach(this);
-
-        // dagger
-        ((BleApplication) getApplication()).getAppComponent().inject(this);
-
         // toolbar
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         // fab
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -72,22 +62,24 @@ public class MainActivity extends BaseActivity
         });
 
         // drawer
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        //init ViewModel
+        mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         Log.i(TAG, "onStart");
-        mMainPresenter.decideAutoScan();
+        mViewModel.getBound().observe(this, this::onServiceBounded);
     }
 
     @Override
@@ -100,19 +92,21 @@ public class MainActivity extends BaseActivity
     protected void onResume() {
         super.onResume();
         Log.i(TAG, "onResume");
+        mViewModel.bindService(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         Log.i(TAG, "onPause");
+        mViewModel.stopScan();
+        mViewModel.unbindService(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         Log.i(TAG, "onStop");
-        flowSubscription.unsubscribe();
     }
 
     @Override
@@ -123,7 +117,7 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -155,7 +149,7 @@ public class MainActivity extends BaseActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
@@ -173,56 +167,39 @@ public class MainActivity extends BaseActivity
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
-    @Override
-    public void scanForBle() {
-        flowSubscription = rxBleClient.observeStateChanges()
-                .startWith(rxBleClient.getState())
-                .switchMap(this::getObservableForStateChange)
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnUnsubscribe(this::clearSubscription)
-                .subscribe(this::onDeviceFound, this::onScanError);
-    }
+    private void onServiceBounded(boolean isServiceBounded) {
+        if (!isServiceBounded) {
+            // service not bounded
+            return;
+        }
 
-
-    private void clearSubscription() {
-        Log.i(BLE_TAG, "Unsubscribed");
-        flowSubscription = null;
-    }
-
-    private Observable<? extends RxBleScanResult> getObservableForStateChange(RxBleClient.State state) {
-        Log.i(BLE_TAG, state.name());
-        switch (state) {
-            case READY:
-                // everything should work
-                return rxBleClient.scanBleDevices();
+        RxBleClient.State bleState = mViewModel.getBleState();
+        switch (bleState) {
             case BLUETOOTH_NOT_AVAILABLE:
-                // basically no functionality will work here
+                Toast.makeText(this, "Bluetooth not available", Toast.LENGTH_SHORT).show();
+                finish();
+                break;
             case LOCATION_PERMISSION_NOT_GRANTED:
-                // scanning and connecting will not work
                 rxPermissions.request(Manifest.permission.ACCESS_COARSE_LOCATION)
                         .subscribe(this::onPermissionChanged);
+                break;
             case BLUETOOTH_NOT_ENABLED:
-                // scanning and connecting will not work
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivity(enableBtIntent);
+                break;
             case LOCATION_SERVICES_NOT_ENABLED:
-                // scanning will not work
-            default:
-                return Observable.empty();
+                Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+                break;
+            case READY:
+                mViewModel.startScan();
+                break;
         }
-    }
-
-    private void onDeviceFound(RxBleScanResult rxBleScanResult) {
-        // Process scan result here.
-        RxBleDevice bleDevice = rxBleScanResult.getBleDevice();
-        Log.i(BLE_TAG, bleDevice.getMacAddress());
-    }
-
-    private void onScanError(Throwable throwable) {
-        Log.i(BLE_TAG, "Error ");
     }
 
     private void onPermissionChanged(Boolean granted) {
@@ -232,5 +209,10 @@ public class MainActivity extends BaseActivity
         } else {
             // At least one permission is denied
         }
+    }
+
+    @Override
+    public LifecycleRegistry getLifecycle() {
+        return lifecycleRegistry;
     }
 }
