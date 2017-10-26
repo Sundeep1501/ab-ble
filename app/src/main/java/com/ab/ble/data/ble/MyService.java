@@ -13,6 +13,9 @@ import com.polidea.rxandroidble.exceptions.BleScanException;
 import com.polidea.rxandroidble.scan.ScanResult;
 import com.polidea.rxandroidble.scan.ScanSettings;
 
+import java.util.concurrent.TimeUnit;
+
+import rx.Completable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -22,10 +25,12 @@ public class MyService extends Service {
 
     public static final String ACTION_DEVICE_FOUND = "deviceFound";
     public static final String ACTION_SCAN_EXCEPTION = "scanException";
+    public static final String ACTION_SCAN_STARTED = "scanStarted";
+    public static final String ACTION_SCAN_STOPPED = "scanStopped";
 
     private RxBleClient mRxBleClient;
     private Subscription mScanSubscription;
-
+    private Subscription timerSubscription;
     private IBinder mBinder = new LocalBinder();
 
     /**
@@ -70,10 +75,25 @@ public class MyService extends Service {
      * Method for clients to start the scan
      */
     public void startScan() {
+        if (mRxBleClient.getState() == RxBleClient.State.READY) {
+            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_SCAN_STARTED));
+        }
+
         mScanSubscription = mRxBleClient.scanBleDevices(new ScanSettings.Builder().build())
                 .doOnUnsubscribe(this::clearScanSubscription)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onScanResult, this::onScanFailure);
+    }
+
+    /**
+     * method for clients to scan for devices for given time and stop
+     *
+     * @param scanTimeSecs time to scan
+     */
+    public void startScan(int scanTimeSecs) {
+        startScan();
+        timerSubscription = Completable.timer(scanTimeSecs, TimeUnit.SECONDS)
+                .subscribe(this::stopScan);
     }
 
     /**
@@ -83,29 +103,16 @@ public class MyService extends Service {
         if (mScanSubscription != null) {
             mScanSubscription.unsubscribe();
         }
-    }
-
-    /**
-     * Method to tell whether service is scanning
-     *
-     * @return true is the service is scanning
-     */
-    public boolean isScanning() {
-        return mScanSubscription != null;
-    }
-
-    /**
-     * get the state of the ble
-     *
-     * @return {@link com.polidea.rxandroidble.RxBleClient.State}
-     */
-    public RxBleClient.State getBleState() {
-        return mRxBleClient.getState();
+        if (timerSubscription != null) {
+            timerSubscription.unsubscribe();
+        }
     }
 
     private void onScanFailure(Throwable throwable) {
         if (throwable instanceof BleScanException) {
-            handleBleScanException((BleScanException) throwable);
+            Intent intent = new Intent(ACTION_SCAN_EXCEPTION);
+            intent.putExtra(ACTION_SCAN_EXCEPTION, ((BleScanException) throwable).getReason());
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         }
     }
 
@@ -118,12 +125,7 @@ public class MyService extends Service {
     private void clearScanSubscription() {
         mScanSubscription = null;
         Log.i(TAG, "Service Scan unsubscribed");
-    }
-
-    private void handleBleScanException(BleScanException bleScanException) {
-        Intent intent = new Intent(ACTION_SCAN_EXCEPTION);
-        intent.putExtra(ACTION_SCAN_EXCEPTION, bleScanException.getReason());
+        Intent intent = new Intent(ACTION_SCAN_STOPPED);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
-
 }

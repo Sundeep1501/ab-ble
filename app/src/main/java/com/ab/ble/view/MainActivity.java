@@ -76,8 +76,8 @@ public class MainActivity extends AppCompatActivity
 
         //init ViewModel
         mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        mViewModel.getBound().observe(this, this::onServiceBounded);
-        mViewModel.getReason().observe(this, this::handleException);
+        mViewModel.getReason().observe(this, this::onScanFailure);
+        mViewModel.getScanStatus().observe(this, this::onScanStatusChanged);
     }
 
     @Override
@@ -144,7 +144,8 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_scan) {
+            mViewModel.onScanButtonClicked();
             return true;
         }
 
@@ -157,8 +158,8 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
+        if (id == R.id.nav_settings) {
+            Toast.makeText(this, "Settings Clicked", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -176,15 +177,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void onServiceBounded(boolean isServiceBounded) {
-        if (!isServiceBounded) {
-            // service not bounded
-            return;
-        }
-        mViewModel.startScan();
-    }
-
-
     private void onPermissionChanged(Boolean granted) {
         Log.i(PERMISSION_TAG, "Permissions" + (granted ? "" : " not") + " Granted");
         if (granted) {
@@ -199,7 +191,12 @@ public class MainActivity extends AppCompatActivity
         return lifecycleRegistry;
     }
 
-    private void handleException(int reason) {
+    private void onScanStatusChanged(boolean isScanning) {
+
+        Toast.makeText(this, isScanning ? "Scanning" : "Stopped", Toast.LENGTH_SHORT).show();
+    }
+
+    private void onScanFailure(int reason) {
         final String text;
         switch (reason) {
             case BleScanException.BLUETOOTH_NOT_AVAILABLE:

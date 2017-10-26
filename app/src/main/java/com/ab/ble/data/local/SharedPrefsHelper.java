@@ -27,11 +27,11 @@ public class SharedPrefsHelper {
     }
 
     public int getScanTime() {
-        return mSharedPreferences.getInt(SCAN_TIME, 2);
+        return mSharedPreferences.getInt(SCAN_TIME, 10);
     }
 
     public boolean isContinuousScan() {
-        return mSharedPreferences.getBoolean(CONTINUOUS_SCAN, true);
+        return mSharedPreferences.getBoolean(CONTINUOUS_SCAN, false);
     }
 
     public void setContinuousScan(boolean continuousScan) {

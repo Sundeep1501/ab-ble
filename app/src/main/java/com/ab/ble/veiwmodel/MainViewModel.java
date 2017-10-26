@@ -32,8 +32,9 @@ public class MainViewModel extends AndroidViewModel {
     private SPRepository mSPRepository;
 
     private MyService mService;
-    private MutableLiveData<Boolean> mBound;
+    private boolean mBound;
     private MutableLiveData<Integer> mReason;
+    private MutableLiveData<Boolean> mScanning;
 
     private List<BleDevice> bleDeviceList = new ArrayList<>();
 
@@ -42,13 +43,14 @@ public class MainViewModel extends AndroidViewModel {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             MyService.LocalBinder localBinder = (MyService.LocalBinder) iBinder;
             mService = localBinder.getService();
-            mBound.setValue(true);
+            mBound = true;
+            startScan();
             Log.i(TAG, "Service Connected");
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            mBound.setValue(false);
+            mBound = false;
             Log.i(TAG, "Service Disconnected");
         }
     };
@@ -69,6 +71,12 @@ public class MainViewModel extends AndroidViewModel {
                     int reason = intent.getIntExtra(MyService.ACTION_SCAN_EXCEPTION, -1);
                     mReason.setValue(reason);
                     break;
+                case MyService.ACTION_SCAN_STOPPED:
+                    mScanning.setValue(false);
+                    break;
+                case MyService.ACTION_SCAN_STARTED:
+                    mScanning.setValue(true);
+                    break;
             }
         }
     };
@@ -79,8 +87,10 @@ public class MainViewModel extends AndroidViewModel {
         mReason = new MutableLiveData<>();
         mReason.setValue(-1);
 
-        mBound = new MutableLiveData<>();
-        mBound.setValue(false);
+        mBound = false;
+
+        mScanning = new MutableLiveData<>();
+        mScanning.setValue(false);
     }
 
     public void bindService(Context activityContext) {
@@ -90,6 +100,8 @@ public class MainViewModel extends AndroidViewModel {
 
         IntentFilter intentFilter = new IntentFilter(MyService.ACTION_DEVICE_FOUND);
         intentFilter.addAction(MyService.ACTION_SCAN_EXCEPTION);
+        intentFilter.addAction(MyService.ACTION_SCAN_STOPPED);
+        intentFilter.addAction(MyService.ACTION_SCAN_STARTED);
         LocalBroadcastManager.getInstance(activityContext).registerReceiver(deviceFoundReceiver, intentFilter);
     }
 
@@ -97,29 +109,41 @@ public class MainViewModel extends AndroidViewModel {
         LocalBroadcastManager.getInstance(activityContext).unregisterReceiver(deviceFoundReceiver);
 
         // Unbind from the service
-        if (mBound.getValue()) {
+        if (mBound) {
             activityContext.unbindService(mServiceConnection);
-            mBound.setValue(false);
+            mBound = false;
         }
     }
 
-    public void startScan() {
-        if (mBound.getValue()) {
-            mService.startScan();
+    private void startScan() {
+        if (mBound) {
+            if (isContinuousScan()) {
+                mService.startScan();
+            } else {
+                mService.startScan(getScanTime());
+            }
         }
     }
 
     public void stopScan() {
-        if (mBound.getValue()) {
+        if (mBound) {
             mService.stopScan();
         }
     }
 
-    public boolean isContinuousScan() {
+    public void onScanButtonClicked() {
+        if (mScanning.getValue()) {
+            stopScan();
+        } else {
+            startScan();
+        }
+    }
+
+    private boolean isContinuousScan() {
         return mSPRepository.isContinuousScan();
     }
 
-    int getScanTime() {
+    private int getScanTime() {
         return mSPRepository.getScanTime();
     }
 
@@ -127,7 +151,7 @@ public class MainViewModel extends AndroidViewModel {
         return mReason;
     }
 
-    public LiveData<Boolean> getBound() {
-        return mBound;
+    public LiveData<Boolean> getScanStatus() {
+        return mScanning;
     }
 }
