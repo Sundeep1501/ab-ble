@@ -18,13 +18,9 @@ import com.ab.ble.BleApplication;
 import com.ab.ble.data.ble.MyService;
 import com.ab.ble.data.ble.model.BleDevice;
 import com.ab.ble.repository.SPRepository;
-import com.polidea.rxandroidble.RxBleClient;
-import com.polidea.rxandroidble.exceptions.BleScanException;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by sunde_000 on 25/10/2017.
@@ -37,6 +33,7 @@ public class MainViewModel extends AndroidViewModel {
 
     private MyService mService;
     private MutableLiveData<Boolean> mBound;
+    private MutableLiveData<Integer> mReason;
 
     private List<BleDevice> bleDeviceList = new ArrayList<>();
 
@@ -70,7 +67,7 @@ public class MainViewModel extends AndroidViewModel {
                     break;
                 case MyService.ACTION_SCAN_EXCEPTION:
                     int reason = intent.getIntExtra(MyService.ACTION_SCAN_EXCEPTION, -1);
-                    handleException(reason);
+                    mReason.setValue(reason);
                     break;
             }
         }
@@ -79,6 +76,9 @@ public class MainViewModel extends AndroidViewModel {
     public MainViewModel(Application application) {
         super(application);
         this.mSPRepository = ((BleApplication) application).getSPRepository();
+        mReason = new MutableLiveData<>();
+        mReason.setValue(-1);
+
         mBound = new MutableLiveData<>();
         mBound.setValue(false);
     }
@@ -115,13 +115,6 @@ public class MainViewModel extends AndroidViewModel {
         }
     }
 
-    public RxBleClient.State getBleState() {
-        if (mBound.getValue()) {
-            return mService.getBleState();
-        }
-        throw new RuntimeException(TAG + " Service not bounded with ViewModel");
-    }
-
     public boolean isContinuousScan() {
         return mSPRepository.isContinuousScan();
     }
@@ -130,56 +123,8 @@ public class MainViewModel extends AndroidViewModel {
         return mSPRepository.getScanTime();
     }
 
-    private void handleException(int reason) {
-        final String text;
-        switch (reason) {
-            case BleScanException.BLUETOOTH_NOT_AVAILABLE:
-                text = "Bluetooth is not available";
-                break;
-            case BleScanException.BLUETOOTH_DISABLED:
-                text = "Enable bluetooth and try again";
-                break;
-            case BleScanException.LOCATION_PERMISSION_MISSING:
-                text = "On Android 6.0 location permission is required. Implement Runtime Permissions";
-                break;
-            case BleScanException.LOCATION_SERVICES_DISABLED:
-                text = "Location services needs to be enabled on Android 6.0";
-                break;
-            case BleScanException.SCAN_FAILED_ALREADY_STARTED:
-                text = "Scan with the same filters is already started";
-                break;
-            case BleScanException.SCAN_FAILED_APPLICATION_REGISTRATION_FAILED:
-                text = "Failed to register application for bluetooth scan";
-                break;
-            case BleScanException.SCAN_FAILED_FEATURE_UNSUPPORTED:
-                text = "Scan with specified parameters is not supported";
-                break;
-            case BleScanException.SCAN_FAILED_INTERNAL_ERROR:
-                text = "Scan failed due to internal error";
-                break;
-            case BleScanException.SCAN_FAILED_OUT_OF_HARDWARE_RESOURCES:
-                text = "Scan cannot start due to limited hardware resources";
-                break;
-/*
-case BleScanException.UNDOCUMENTED_SCAN_THROTTLE:
-    text = String.format(
-            Locale.getDefault(),
-            "Android 7+ does not allow more scans. Try in %d seconds",
-            secondsTill(bleScanException.getRetryDateSuggestion())
-    );
-    break;
-*/
-            case BleScanException.UNKNOWN_ERROR_CODE:
-            case BleScanException.BLUETOOTH_CANNOT_START:
-            default:
-                text = "Unable to start scanning";
-                break;
-        }
-        Log.w(TAG, text);
-    }
-
-    private long secondsTill(Date retryDateSuggestion) {
-        return TimeUnit.MILLISECONDS.toSeconds(retryDateSuggestion.getTime() - System.currentTimeMillis());
+    public LiveData<Integer> getReason() {
+        return mReason;
     }
 
     public LiveData<Boolean> getBound() {

@@ -13,9 +13,6 @@ import com.polidea.rxandroidble.exceptions.BleScanException;
 import com.polidea.rxandroidble.scan.ScanResult;
 import com.polidea.rxandroidble.scan.ScanSettings;
 
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -73,9 +70,8 @@ public class MyService extends Service {
      * Method for clients to start the scan
      */
     public void startScan() {
-        Log.i(TAG, "Service Scan subscribed");
         mScanSubscription = mRxBleClient.scanBleDevices(new ScanSettings.Builder().build())
-                .doOnUnsubscribe(this::clearSubscription)
+                .doOnUnsubscribe(this::clearScanSubscription)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onScanResult, this::onScanFailure);
     }
@@ -84,7 +80,6 @@ public class MyService extends Service {
      * Method for clients to stop the scan
      */
     public void stopScan() {
-        Log.i(TAG, "Service Scan unsubscribed");
         if (mScanSubscription != null) {
             mScanSubscription.unsubscribe();
         }
@@ -115,15 +110,14 @@ public class MyService extends Service {
     }
 
     private void onScanResult(ScanResult scanResult) {
-        Log.i(TAG, "Device found " + scanResult.getBleDevice().getMacAddress());
-
         Intent intent = new Intent(ACTION_DEVICE_FOUND);
         intent.putExtra(ACTION_DEVICE_FOUND, BleDevice.getInstance(scanResult));
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
-    private void clearSubscription() {
+    private void clearScanSubscription() {
         mScanSubscription = null;
+        Log.i(TAG, "Service Scan unsubscribed");
     }
 
     private void handleBleScanException(BleScanException bleScanException) {

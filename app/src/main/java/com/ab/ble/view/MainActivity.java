@@ -23,8 +23,11 @@ import android.widget.Toast;
 
 import com.ab.ble.R;
 import com.ab.ble.veiwmodel.MainViewModel;
-import com.polidea.rxandroidble.RxBleClient;
+import com.polidea.rxandroidble.exceptions.BleScanException;
 import com.tbruyelle.rxpermissions2.RxPermissions;
+
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity
         implements LifecycleRegistryOwner, NavigationView.OnNavigationItemSelectedListener {
@@ -73,13 +76,14 @@ public class MainActivity extends AppCompatActivity
 
         //init ViewModel
         mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        mViewModel.getBound().observe(this, this::onServiceBounded);
+        mViewModel.getReason().observe(this, this::handleException);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         Log.i(TAG, "onStart");
-        mViewModel.getBound().observe(this, this::onServiceBounded);
     }
 
     @Override
@@ -177,30 +181,9 @@ public class MainActivity extends AppCompatActivity
             // service not bounded
             return;
         }
-
-        RxBleClient.State bleState = mViewModel.getBleState();
-        switch (bleState) {
-            case BLUETOOTH_NOT_AVAILABLE:
-                Toast.makeText(this, "Bluetooth not available", Toast.LENGTH_SHORT).show();
-                finish();
-                break;
-            case LOCATION_PERMISSION_NOT_GRANTED:
-                rxPermissions.request(Manifest.permission.ACCESS_COARSE_LOCATION)
-                        .subscribe(this::onPermissionChanged);
-                break;
-            case BLUETOOTH_NOT_ENABLED:
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivity(enableBtIntent);
-                break;
-            case LOCATION_SERVICES_NOT_ENABLED:
-                Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-                break;
-            case READY:
-                mViewModel.startScan();
-                break;
-        }
+        mViewModel.startScan();
     }
+
 
     private void onPermissionChanged(Boolean granted) {
         Log.i(PERMISSION_TAG, "Permissions" + (granted ? "" : " not") + " Granted");
@@ -215,4 +198,65 @@ public class MainActivity extends AppCompatActivity
     public LifecycleRegistry getLifecycle() {
         return lifecycleRegistry;
     }
+
+    private void handleException(int reason) {
+        final String text;
+        switch (reason) {
+            case BleScanException.BLUETOOTH_NOT_AVAILABLE:
+                text = "Bluetooth is not available";
+                Toast.makeText(this, "Bluetooth not available", Toast.LENGTH_SHORT).show();
+                finish();
+                break;
+            case BleScanException.BLUETOOTH_DISABLED:
+                text = "Enable bluetooth and try again";
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivity(enableBtIntent);
+                break;
+            case BleScanException.LOCATION_PERMISSION_MISSING:
+                text = "On Android 6.0 location permission is required. Implement Runtime Permissions";
+                rxPermissions.request(Manifest.permission.ACCESS_COARSE_LOCATION)
+                        .subscribe(this::onPermissionChanged);
+                break;
+            case BleScanException.LOCATION_SERVICES_DISABLED:
+                text = "Location services needs to be enabled on Android 6.0";
+                Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+                break;
+            case BleScanException.SCAN_FAILED_ALREADY_STARTED:
+                text = "Scan with the same filters is already started";
+                break;
+            case BleScanException.SCAN_FAILED_APPLICATION_REGISTRATION_FAILED:
+                text = "Failed to register application for bluetooth scan";
+                break;
+            case BleScanException.SCAN_FAILED_FEATURE_UNSUPPORTED:
+                text = "Scan with specified parameters is not supported";
+                break;
+            case BleScanException.SCAN_FAILED_INTERNAL_ERROR:
+                text = "Scan failed due to internal error";
+                break;
+            case BleScanException.SCAN_FAILED_OUT_OF_HARDWARE_RESOURCES:
+                text = "Scan cannot start due to limited hardware resources";
+                break;
+/*
+case BleScanException.UNDOCUMENTED_SCAN_THROTTLE:
+    text = String.format(
+            Locale.getDefault(),
+            "Android 7+ does not allow more scans. Try in %d seconds",
+            secondsTill(bleScanException.getRetryDateSuggestion())
+    );
+    break;
+*/
+            case BleScanException.UNKNOWN_ERROR_CODE:
+            case BleScanException.BLUETOOTH_CANNOT_START:
+            default:
+                text = "Unable to start scanning";
+                break;
+        }
+        Log.w(TAG, text);
+    }
+
+    private long secondsTill(Date retryDateSuggestion) {
+        return TimeUnit.MILLISECONDS.toSeconds(retryDateSuggestion.getTime() - System.currentTimeMillis());
+    }
+
 }
