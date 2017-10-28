@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
@@ -46,7 +45,7 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
 
     // architecture components
-    compile 'android.arch.lifecycle:extensions:' + rootProject.archLifecycleVersion;
+    compile 'android.arch.lifecycle:extensions:' + rootProject.archLifecycleVersion
 
     // kotlin
     compile 'org.jetbrains.kotlin:kotlin-stdlib:'+rootProject.kotlin_version
