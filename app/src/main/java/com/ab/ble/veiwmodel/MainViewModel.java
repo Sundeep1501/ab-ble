@@ -1,7 +1,6 @@
 package com.ab.ble.veiwmodel;
 
 import android.app.Application;
-import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.BroadcastReceiver;
@@ -17,7 +16,6 @@ import android.util.Log;
 import com.ab.ble.BleApplication;
 import com.ab.ble.data.ble.MyService;
 import com.ab.ble.data.ble.model.BleDevice;
-import com.ab.ble.repository.SPRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +24,9 @@ import java.util.List;
  * Created by sunde_000 on 25/10/2017.
  */
 
-public class MainViewModel extends AndroidViewModel {
+public class MainViewModel extends BaseAndroidViewModel {
 
     private final String TAG = MainViewModel.class.getSimpleName();
-    private SPRepository mSPRepository;
 
     private MyService mService;
     private boolean mBound;

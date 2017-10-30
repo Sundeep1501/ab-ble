@@ -24,8 +24,8 @@ public class SPRepository {
         return mSharedPrefsHelper.getScanTime();
     }
 
-    public void setContinuousScan() {
-        mSharedPrefsHelper.setContinuousScan(true);
+    public void setContinuousScan(boolean isContinuousScan) {
+        mSharedPrefsHelper.setContinuousScan(isContinuousScan);
     }
 
     public Boolean isContinuousScan() {

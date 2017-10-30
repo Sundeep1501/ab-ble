@@ -25,6 +25,8 @@
         </activity>
 
         <service android:name=".data.ble.MyService" />
+
+        <activity android:name=".view.SettingsActivity"></activity>
     </application>
 
 </manifest>

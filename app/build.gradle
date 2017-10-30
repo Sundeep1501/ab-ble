@@ -39,16 +39,16 @@ dependencies {
     })
 
     // support
-    compile 'com.android.support:appcompat-v7:'+rootProject.support_version
-    compile 'com.android.support:support-v4:'+rootProject.support_version
-    compile 'com.android.support:design:'+rootProject.support_version
+    compile 'com.android.support:appcompat-v7:' + rootProject.support_version
+    compile 'com.android.support:support-v4:' + rootProject.support_version
+    compile 'com.android.support:design:' + rootProject.support_version
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
 
     // architecture components
     compile 'android.arch.lifecycle:extensions:' + rootProject.archLifecycleVersion
 
     // kotlin
-    compile 'org.jetbrains.kotlin:kotlin-stdlib:'+rootProject.kotlin_version
+    compile 'org.jetbrains.kotlin:kotlin-stdlib:' + rootProject.kotlin_version
 
     // rxjava2
     compile 'io.reactivex.rxjava2:rxjava:2.0.7'

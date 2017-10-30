@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_settings) {
-            Toast.makeText(this, "Settings Clicked", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, SettingsActivity.class));
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {

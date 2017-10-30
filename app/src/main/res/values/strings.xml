@@ -6,4 +6,6 @@
 
     <string name="action_scan">Scan</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="continuous_scan">Continuous Scan</string>
+    <string name="manual_scan">Manual Scan</string>
 </resources>
