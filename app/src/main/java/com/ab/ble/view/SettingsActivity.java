@@ -5,6 +5,7 @@ import android.arch.lifecycle.LifecycleRegistryOwner;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.RadioButton;
 
@@ -12,6 +13,7 @@ import com.ab.ble.R;
 import com.ab.ble.veiwmodel.SettingsViewModel;
 
 public class SettingsActivity extends AppCompatActivity implements LifecycleRegistryOwner {
+    private static final String TAG = SettingsActivity.class.getSimpleName();
 
     private final LifecycleRegistry lifecycleRegistry = new LifecycleRegistry(this);
 
@@ -24,6 +26,7 @@ public class SettingsActivity extends AppCompatActivity implements LifecycleRegi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mContinuousRB = findViewById(R.id.continuous_rb);
         mManualRB = findViewById(R.id.manual_rb);
@@ -35,6 +38,16 @@ public class SettingsActivity extends AppCompatActivity implements LifecycleRegi
     @Override
     public LifecycleRegistry getLifecycle() {
         return lifecycleRegistry;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void onClick(View v) {

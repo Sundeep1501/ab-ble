@@ -23,7 +23,8 @@
             android:id="@+id/continuous_rb"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            android:clickable="false" />
     </RelativeLayout>
 
 
@@ -44,6 +45,7 @@
             android:id="@+id/manual_rb"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            android:clickable="false" />
     </RelativeLayout>
 </LinearLayout>
