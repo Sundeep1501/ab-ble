@@ -14,10 +14,17 @@
         android:padding="16dp">
 
         <TextView
+            android:id="@+id/header_contiuous"
+            style="@style/Base.TextAppearance.AppCompat.Medium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:text="@string/continuous_scan" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/header_contiuous"
+            android:text="Keeps scanning until you stop" />
 
         <RadioButton
             android:id="@+id/continuous_rb"
@@ -36,10 +43,18 @@
         android:padding="16dp">
 
         <TextView
+            android:id="@+id/header_manual"
+            style="@style/Base.TextAppearance.AppCompat.Medium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:text="@string/manual_scan" />
+
+        <TextView
+            android:id="@+id/scan_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/header_manual"
+            android:text="@string/scan_time_label" />
 
         <RadioButton
             android:id="@+id/manual_rb"

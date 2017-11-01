@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RadioButton;
+import android.widget.TextView;
 
 import com.ab.ble.R;
 import com.ab.ble.veiwmodel.SettingsViewModel;
@@ -19,6 +20,7 @@ public class SettingsActivity extends AppCompatActivity implements LifecycleRegi
 
     private SettingsViewModel mViewModel;
 
+    private TextView mScanTimeTV;
     private RadioButton mContinuousRB;
     private RadioButton mManualRB;
 
@@ -30,9 +32,11 @@ public class SettingsActivity extends AppCompatActivity implements LifecycleRegi
 
         mContinuousRB = findViewById(R.id.continuous_rb);
         mManualRB = findViewById(R.id.manual_rb);
+        mScanTimeTV = findViewById(R.id.scan_time);
 
         mViewModel = ViewModelProviders.of(this).get(SettingsViewModel.class);
-        mViewModel.getIsContinuousScan().observe(this, this::updateDataAndUI);
+        mViewModel.isContinuousScan.observe(this, this::updateDataAndUI);
+        mViewModel.scanTime.observe(this, this::onScanTimeChange);
     }
 
     @Override
@@ -57,6 +61,7 @@ public class SettingsActivity extends AppCompatActivity implements LifecycleRegi
                 break;
             case R.id.manual_layout:
                 mViewModel.onManualLayoutClicked();
+                NumberPickerDialogFragment.showFragment(getSupportFragmentManager());
                 break;
         }
     }
@@ -64,5 +69,9 @@ public class SettingsActivity extends AppCompatActivity implements LifecycleRegi
     private void updateDataAndUI(boolean isContinuous) {
         mContinuousRB.setChecked(isContinuous);
         mManualRB.setChecked(!isContinuous);
+    }
+
+    private void onScanTimeChange(int integer) {
+        mScanTimeTV.setText(getString(R.string.scan_time_label, integer));
     }
 }

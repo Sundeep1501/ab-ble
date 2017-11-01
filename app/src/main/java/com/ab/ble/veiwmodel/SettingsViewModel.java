@@ -8,12 +8,15 @@ import android.arch.lifecycle.MutableLiveData;
  */
 
 public class SettingsViewModel extends BaseAndroidViewModel {
-    private MutableLiveData<Boolean> isContinuousScan;
+    public final MutableLiveData<Boolean> isContinuousScan;
+    public final MutableLiveData<Integer> scanTime;
 
     public SettingsViewModel(Application application) {
         super(application);
         isContinuousScan = new MutableLiveData<>();
         isContinuousScan.setValue(isContinuousScan());
+        scanTime = new MutableLiveData<>();
+        scanTime.setValue(getScanTime());
     }
 
     private boolean isContinuousScan() {
@@ -26,6 +29,7 @@ public class SettingsViewModel extends BaseAndroidViewModel {
 
     public void setScanTime(int secs) {
         mSPRepository.setScanTime(secs);
+        scanTime.setValue(secs);
     }
 
     public void setContinuousScan(boolean isContinuousScan) {
@@ -40,9 +44,5 @@ public class SettingsViewModel extends BaseAndroidViewModel {
     public void onManualLayoutClicked() {
         setContinuousScan(false);
         isContinuousScan.setValue(false);
-    }
-
-    public MutableLiveData<Boolean> getIsContinuousScan() {
-        return isContinuousScan;
     }
 }

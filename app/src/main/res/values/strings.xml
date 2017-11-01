@@ -8,4 +8,11 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="continuous_scan">Continuous Scan</string>
     <string name="manual_scan">Manual Scan</string>
+
+    <string name="scan_time_label">Scan time %1$d secs</string>
+
+    <string name="dialog_title_scan_time_picker">Scanning time (in secs)</string>
+
+    <integer name="scan_time_min">1</integer>
+    <integer name="scan_time_max">60</integer>
 </resources>
