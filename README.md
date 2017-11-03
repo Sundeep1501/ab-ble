@@ -12,3 +12,7 @@ The purpose of this app is to understand the [Android Architecture Components](h
 ## Authors
 
 * [**Sundeep1501**](https://github.com/Sundeep1501)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
