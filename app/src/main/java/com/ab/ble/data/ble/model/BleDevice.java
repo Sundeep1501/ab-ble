@@ -12,9 +12,9 @@ import com.polidea.rxandroidble.scan.ScanResult;
 
 public class BleDevice implements Parcelable {
 
-    private final String macAddress;
-    private final String name;
-    private final int rssi;
+    public final String macAddress;
+    public final String name;
+    public final int rssi;
 
     public BleDevice(String macAddress, String name, int rssi) {
         this.macAddress = macAddress;
@@ -57,22 +57,10 @@ public class BleDevice implements Parcelable {
         parcel.writeInt(rssi);
     }
 
-    public String getMacAddress() {
-        return macAddress;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getRssi() {
-        return rssi;
-    }
-
     @Override
     public boolean equals(Object obj) {
         return obj != null
                 && obj instanceof BleDevice
-                && ((BleDevice) obj).getMacAddress().equalsIgnoreCase(getMacAddress());
+                && ((BleDevice) obj).macAddress.equalsIgnoreCase(macAddress);
     }
 }

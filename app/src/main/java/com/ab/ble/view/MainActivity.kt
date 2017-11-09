@@ -14,18 +14,23 @@ import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import com.ab.ble.R
+import com.ab.ble.data.ble.model.BleDevice
 import com.ab.ble.veiwmodel.MainViewModel
+import com.ab.ble.veiwmodel.RecyclerViewAdapter
 import com.polidea.rxandroidble.exceptions.BleScanException
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.functions.Consumer
+import kotlinx.android.synthetic.main.content_main.*
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity(), LifecycleRegistryOwner, NavigationView.OnNavigationItemSelectedListener {
 
@@ -62,10 +67,15 @@ class MainActivity : AppCompatActivity(), LifecycleRegistryOwner, NavigationView
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
         navigationView.setNavigationItemSelectedListener(this)
 
+        // recycler view
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = RecyclerViewAdapter(ArrayList())
+
         //init ViewModel
         mViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        mViewModel!!.mReason.observe(this, Observer<Int> { reason -> this.onScanFailure(reason!!) })
-        mViewModel!!.mScanning.observe(this, Observer<Boolean> { status -> this.onScanStatusChanged(status!!) })
+        mViewModel!!.mReason?.observe(this, Observer<Int> { reason -> this.onScanFailure(reason!!) })
+        mViewModel!!.mScanning?.observe(this, Observer<Boolean> { status -> this.onScanStatusChanged(status!!) })
+        mViewModel!!.bleDeviceList?.observe(this, Observer<MutableList<BleDevice>> { devices -> this.onDevicesUpdated(devices!!) })
     }
 
     override fun onStart() {
@@ -169,6 +179,10 @@ class MainActivity : AppCompatActivity(), LifecycleRegistryOwner, NavigationView
 
     private fun onScanStatusChanged(isScanning: Boolean) {
         Toast.makeText(this, if (isScanning) "Scanning" else "Stopped", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun onDevicesUpdated(devices: MutableList<BleDevice>) {
+        (recyclerView.adapter as RecyclerViewAdapter).addItems(devices)
     }
 
     private fun onScanFailure(reason: Int) {

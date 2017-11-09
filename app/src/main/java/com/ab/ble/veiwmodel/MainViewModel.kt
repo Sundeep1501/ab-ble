@@ -8,7 +8,6 @@ import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
 import com.ab.ble.data.ble.MyService
 import com.ab.ble.data.ble.model.BleDevice
-import java.util.*
 
 /**
  * Created by sunde_000 on 25/10/2017.
@@ -20,10 +19,10 @@ class MainViewModel(application: Application) : BaseAndroidViewModel(application
 
     private var mService: MyService? = null
     private var mBound: Boolean = false
-    val mReason: MutableLiveData<Int> = MutableLiveData()
-    val mScanning: MutableLiveData<Boolean> = MutableLiveData()
 
-    private val bleDeviceList = ArrayList<BleDevice>()
+    var mReason: MutableLiveData<Int>? = null
+    var mScanning: MutableLiveData<Boolean>? = null
+    var bleDeviceList: MutableLiveData<MutableList<BleDevice>>? = null
 
     private val mServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
@@ -45,26 +44,37 @@ class MainViewModel(application: Application) : BaseAndroidViewModel(application
             when (intent.action) {
                 MyService.ACTION_DEVICE_FOUND -> {
                     val bleDevice = intent.getParcelableExtra<BleDevice>(intent.action)
-                    if (bleDeviceList.contains(bleDevice)) {
-                        bleDeviceList.remove(bleDevice)
+
+                    val list = bleDeviceList!!.value
+                    val indexOf = list!!.indexOf(bleDevice)
+                    if (indexOf == -1) {
+                        list.add(bleDevice)
+                    } else {
+                        list[indexOf] = bleDevice
                     }
-                    bleDeviceList.add(bleDevice)
+
+                    bleDeviceList!!.value = list
                     Log.i(TAG, "Device found " + bleDevice.macAddress)
                 }
                 MyService.ACTION_SCAN_EXCEPTION -> {
                     val reason = intent.getIntExtra(MyService.ACTION_SCAN_EXCEPTION, -1)
-                    mReason.value = reason
+                    mReason!!.value = reason
                 }
-                MyService.ACTION_SCAN_STOPPED -> mScanning.value = false
-                MyService.ACTION_SCAN_STARTED -> mScanning.value = true
+                MyService.ACTION_SCAN_STOPPED -> mScanning!!.value = false
+                MyService.ACTION_SCAN_STARTED -> mScanning!!.value = true
             }
         }
     }
 
     init {
+        mReason = MutableLiveData()
+        mScanning = MutableLiveData()
+        bleDeviceList = MutableLiveData()
+
         mBound = false
-        mReason.value = -1
-        mScanning.value = false
+        mReason!!.value = -1
+        mScanning!!.value = false
+        bleDeviceList!!.value = ArrayList()
     }
 
     fun bindService(activityContext: Context) {
@@ -90,6 +100,7 @@ class MainViewModel(application: Application) : BaseAndroidViewModel(application
     }
 
     private fun startScan() {
+        bleDeviceList!!.value = ArrayList()
         if (mBound) {
             if (mSPRepository!!.isContinuousScan) {
                 mService!!.startScan()
@@ -106,7 +117,7 @@ class MainViewModel(application: Application) : BaseAndroidViewModel(application
     }
 
     fun onScanButtonClicked() {
-        if (mScanning.value!!) {
+        if (mScanning!!.value!!) {
             stopScan()
         } else {
             startScan()
