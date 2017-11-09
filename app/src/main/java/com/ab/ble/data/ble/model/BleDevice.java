@@ -6,6 +6,8 @@ import android.os.Parcelable;
 import com.polidea.rxandroidble.RxBleDevice;
 import com.polidea.rxandroidble.scan.ScanResult;
 
+import java.util.Comparator;
+
 /**
  * Created by sunde_000 on 25/10/2017.
  */
@@ -62,5 +64,24 @@ public class BleDevice implements Parcelable {
         return obj != null
                 && obj instanceof BleDevice
                 && ((BleDevice) obj).macAddress.equalsIgnoreCase(macAddress);
+    }
+
+    static class NameComparator implements Comparator<BleDevice> {
+
+        @Override
+        public int compare(BleDevice p0, BleDevice p1) {
+            return p0.name.compareTo(p1.name);
+        }
+    }
+
+    static class RSSIComparator implements Comparator<BleDevice> {
+
+        @Override
+        public int compare(BleDevice p0, BleDevice p1) {
+            if (p0.rssi == p1.rssi) {
+                return 0;
+            }
+            return p0.rssi - p1.rssi;
+        }
     }
 }
