@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity(), LifecycleRegistryOwner, NavigationView
     private val lifecycleRegistry = LifecycleRegistry(this)
 
     private var mViewModel: MainViewModel? = null
-
     private var rxPermissions: RxPermissions? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,9 +72,9 @@ class MainActivity : AppCompatActivity(), LifecycleRegistryOwner, NavigationView
 
         //init ViewModel
         mViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        mViewModel!!.mReason?.observe(this, Observer<Int> { reason -> this.onScanFailure(reason!!) })
-        mViewModel!!.mScanning?.observe(this, Observer<Boolean> { status -> this.onScanStatusChanged(status!!) })
-        mViewModel!!.bleDeviceList?.observe(this, Observer<MutableList<BleDevice>> { devices -> this.onDevicesUpdated(devices!!) })
+        mViewModel!!.mReason.observe(this, Observer<Int> { reason -> this.onScanFailure(reason!!) })
+        mViewModel!!.mScanning.observe(this, Observer<Boolean> { status -> this.onScanStatusChanged(status!!) })
+        mViewModel!!.bleDeviceList.observe(this, Observer<MutableList<BleDevice>> { devices -> this.onDevicesUpdated(devices!!) })
     }
 
     override fun onStart() {

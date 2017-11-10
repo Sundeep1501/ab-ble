@@ -10,7 +10,6 @@ import com.ab.ble.repository.SPRepository
 
 class BleApplication : Application() {
     var spRepository: SPRepository? = null
-        private set
 
     override fun onCreate() {
         super.onCreate()
