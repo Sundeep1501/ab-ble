@@ -2,6 +2,7 @@ package com.ab.ble.data.ble.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.polidea.rxandroidble.RxBleDevice;
 import com.polidea.rxandroidble.scan.ScanResult;
@@ -66,22 +67,36 @@ public class BleDevice implements Parcelable {
                 && ((BleDevice) obj).macAddress.equalsIgnoreCase(macAddress);
     }
 
-    static class NameComparator implements Comparator<BleDevice> {
+    public static class NameComparator implements Comparator<BleDevice> {
 
         @Override
         public int compare(BleDevice p0, BleDevice p1) {
+            if (TextUtils.isEmpty(p0.name)) {
+                return 1;
+            }
+            if (TextUtils.isEmpty(p1.name)) {
+                return -1;
+            }
             return p0.name.compareTo(p1.name);
         }
     }
 
-    static class RSSIComparator implements Comparator<BleDevice> {
+    public static class MacComparator implements Comparator<BleDevice> {
+
+        @Override
+        public int compare(BleDevice p0, BleDevice p1) {
+            return p0.macAddress.compareTo(p1.macAddress);
+        }
+    }
+
+    public static class RSSIComparator implements Comparator<BleDevice> {
 
         @Override
         public int compare(BleDevice p0, BleDevice p1) {
             if (p0.rssi == p1.rssi) {
                 return 0;
             }
-            return p0.rssi - p1.rssi;
+            return p1.rssi - p0.rssi;
         }
     }
 }

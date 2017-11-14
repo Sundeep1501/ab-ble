@@ -1,9 +1,8 @@
 package com.ab.ble.data.local
 
 import android.content.Context
-import android.content.SharedPreferences
-
 import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 
 class SharedPrefsHelper(context: Context) {
 
