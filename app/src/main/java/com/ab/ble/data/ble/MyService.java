@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 
 import rx.Completable;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 
 public class MyService extends Service {
 
@@ -81,7 +80,6 @@ public class MyService extends Service {
 
         mScanSubscription = mRxBleClient.scanBleDevices(new ScanSettings.Builder().build())
                 .doOnUnsubscribe(this::clearScanSubscription)
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onScanResult, this::onScanFailure);
     }
 
