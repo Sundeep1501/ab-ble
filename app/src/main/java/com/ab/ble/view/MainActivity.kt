@@ -19,6 +19,7 @@ import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Filter
 import android.widget.Toast
 import com.ab.ble.R
 import com.ab.ble.data.ble.model.BleDevice
@@ -144,18 +145,23 @@ class MainActivity : AppCompatActivity(), LifecycleRegistryOwner, NavigationView
         // Handle navigation view item clicks here.
         val id = item.itemId
 
-        if (id == R.id.nav_settings) {
-            startActivity(Intent(this, SettingsActivity::class.java))
-        } else if (id == R.id.nav_gallery) {
+        when (id) {
+            R.id.nav_settings -> startActivity(Intent(this, SettingsActivity::class.java))
+            R.id.nav_filter -> {
+                startActivity(Intent(this, FilterActivity::class.java))
+            }
+            R.id.nav_slideshow -> {
 
-        } else if (id == R.id.nav_slideshow) {
+            }
+            R.id.nav_manage -> {
 
-        } else if (id == R.id.nav_manage) {
+            }
+            R.id.nav_share -> {
 
-        } else if (id == R.id.nav_share) {
+            }
+            R.id.nav_send -> {
 
-        } else if (id == R.id.nav_send) {
-
+            }
         }
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)

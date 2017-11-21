@@ -10,6 +10,9 @@
     <string name="manual_scan">Manual Scan</string>
 
     <string name="scan_time_label">Scan time %1$d secs</string>
+    <string name="enter_name">Enter name</string>
+    <string name="enter_mac">Enter MAC Address</string>
+    <string name="enter_rssi">Enter rssi</string>
 
     <string name="dialog_title_scan_time_picker">Scanning time (in secs)</string>
 

@@ -27,6 +27,7 @@
         <service android:name=".data.ble.MyService" />
 
         <activity android:name=".view.SettingsActivity" />
+        <activity android:name=".view.FilterActivity"></activity>
     </application>
 
 </manifest>
