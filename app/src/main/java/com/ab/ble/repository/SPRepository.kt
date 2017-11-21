@@ -16,6 +16,24 @@ class SPRepository(private val mSharedPrefsHelper: SharedPrefsHelper) {
             mSharedPrefsHelper.isContinuousScan = value
         }
 
+    var isRssiFilterApplied: Boolean
+        get() = mSharedPrefsHelper.isRssiFilterApplied
+        set(value) {
+            mSharedPrefsHelper.isRssiFilterApplied = value
+        }
+
+    var isNameFilterApplied: Boolean
+        get() = mSharedPrefsHelper.isNameFilterApplied
+        set(value) {
+            mSharedPrefsHelper.isNameFilterApplied = value
+        }
+
+    var isMacFilterApplied: Boolean
+        get() = mSharedPrefsHelper.isMacFilterApplied
+        set(value) {
+            mSharedPrefsHelper.isMacFilterApplied = value
+        }
+
     fun clear() {
         mSharedPrefsHelper.clear()
     }
