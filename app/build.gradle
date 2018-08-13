@@ -4,12 +4,12 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.ab.ble"
         minSdkVersion 21
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -33,27 +33,27 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     // support
     implementation 'com.android.support:appcompat-v7:' + rootProject.support_version
     implementation 'com.android.support:support-v4:' + rootProject.support_version
     implementation 'com.android.support:design:' + rootProject.support_version
-    implementation 'com.android.support:cardview-v7:'+rootProject.support_version
-    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.android.support:cardview-v7:' + rootProject.support_version
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
 
     // architecture components
-    compile 'android.arch.lifecycle:extensions:' + rootProject.archLifecycleVersion
+    implementation 'android.arch.lifecycle:extensions:' + rootProject.archLifecycleVersion
     // kotlin
-    compile 'org.jetbrains.kotlin:kotlin-stdlib:' + rootProject.kotlin_version
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:' + rootProject.kotlin_version
     // rxjava2
-    compile 'io.reactivex.rxjava2:rxjava:2.1.5'
-    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.0'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
     // rxandroidble
-    compile 'com.polidea.rxandroidble:rxandroidble:1.4.1'
+    implementation 'com.polidea.rxandroidble2:rxandroidble:1.7.0'
     // rx permissions
-    compile 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.4@aar'
-    testCompile 'junit:junit:4.12'
+    implementation 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.4@aar'
+    testImplementation 'junit:junit:4.12'
 }

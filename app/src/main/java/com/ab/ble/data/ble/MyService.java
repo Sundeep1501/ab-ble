@@ -8,15 +8,16 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.ab.ble.data.ble.model.BleDevice;
-import com.polidea.rxandroidble.RxBleClient;
-import com.polidea.rxandroidble.exceptions.BleScanException;
-import com.polidea.rxandroidble.scan.ScanResult;
-import com.polidea.rxandroidble.scan.ScanSettings;
+import com.polidea.rxandroidble2.RxBleClient;
+import com.polidea.rxandroidble2.exceptions.BleScanException;
+import com.polidea.rxandroidble2.scan.ScanResult;
+import com.polidea.rxandroidble2.scan.ScanSettings;
 
 import java.util.concurrent.TimeUnit;
 
-import rx.Completable;
-import rx.Subscription;
+import io.reactivex.Completable;
+import io.reactivex.disposables.Disposable;
+
 
 public class MyService extends Service {
 
@@ -28,8 +29,8 @@ public class MyService extends Service {
     public static final String ACTION_SCAN_STOPPED = "scanStopped";
 
     private RxBleClient mRxBleClient;
-    private Subscription mScanSubscription;
-    private Subscription timerSubscription;
+    private Disposable mScanSubscription;
+    private Disposable timerSubscription;
     private IBinder mBinder = new LocalBinder();
 
     /**
@@ -79,7 +80,7 @@ public class MyService extends Service {
         }
 
         mScanSubscription = mRxBleClient.scanBleDevices(new ScanSettings.Builder().build())
-                .doOnUnsubscribe(this::clearScanSubscription)
+                .doOnDispose(this::clearScanSubscription)
                 .subscribe(this::onScanResult, this::onScanFailure);
     }
 
@@ -99,10 +100,10 @@ public class MyService extends Service {
      */
     public void stopScan() {
         if (mScanSubscription != null) {
-            mScanSubscription.unsubscribe();
+            mScanSubscription.dispose();
         }
         if (timerSubscription != null) {
-            timerSubscription.unsubscribe();
+            timerSubscription.dispose();
         }
     }
 

@@ -19,15 +19,13 @@ import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Filter
 import android.widget.Toast
 import com.ab.ble.R
 import com.ab.ble.data.ble.model.BleDevice
 import com.ab.ble.veiwmodel.MainViewModel
 import com.ab.ble.veiwmodel.RecyclerViewAdapter
-import com.polidea.rxandroidble.exceptions.BleScanException
+import com.polidea.rxandroidble2.exceptions.BleScanException
 import com.tbruyelle.rxpermissions2.RxPermissions
-import io.reactivex.functions.Consumer
 import kotlinx.android.synthetic.main.content_main.*
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -61,7 +59,7 @@ class MainActivity : AppCompatActivity(), LifecycleRegistryOwner, NavigationView
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         val toggle = ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer.setDrawerListener(toggle)
+        drawer.addDrawerListener(toggle)
         toggle.syncState()
 
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
@@ -206,7 +204,7 @@ class MainActivity : AppCompatActivity(), LifecycleRegistryOwner, NavigationView
             BleScanException.LOCATION_PERMISSION_MISSING -> {
                 text = "On Android 6.0 location permission is required. Implement Runtime Permissions"
                 rxPermissions!!.request(Manifest.permission.ACCESS_COARSE_LOCATION)
-                        .subscribe(Consumer<Boolean> { this.onPermissionChanged(it) })
+                        .subscribe { this.onPermissionChanged(it) }
             }
             BleScanException.LOCATION_SERVICES_DISABLED -> {
                 text = "Location services needs to be enabled on Android 6.0"

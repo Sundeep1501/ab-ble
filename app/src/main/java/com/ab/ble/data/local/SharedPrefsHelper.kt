@@ -16,7 +16,6 @@ class SharedPrefsHelper(context: Context) {
         get() = mSharedPreferences.getBoolean(CONTINUOUS_SCAN, false)
         set(continuousScan) = mSharedPreferences.edit().putBoolean(CONTINUOUS_SCAN, continuousScan).apply()
 
-
     var rssiFilterVal: Int
         get() = mSharedPreferences.getInt(FILTER_RSSI_VAL, -100)
         set(rssi) = mSharedPreferences.edit().putInt(FILTER_RSSI_VAL, rssi).apply()
@@ -28,7 +27,6 @@ class SharedPrefsHelper(context: Context) {
     var macFilterVal: String
         get() = mSharedPreferences.getString(FILTER_MAC_VAL, "")
         set(mac) = mSharedPreferences.edit().putString(FILTER_MAC_VAL, mac).apply()
-
 
     var isRssiFilterApplied: Boolean
         get() = mSharedPreferences.getBoolean(FILTER_RSSI, true)

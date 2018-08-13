@@ -34,6 +34,24 @@ class SPRepository(private val mSharedPrefsHelper: SharedPrefsHelper) {
             mSharedPrefsHelper.isMacFilterApplied = value
         }
 
+    var rssiFilterVal: Int
+        get() = mSharedPrefsHelper.rssiFilterVal
+        set(value) {
+            mSharedPrefsHelper.rssiFilterVal = value
+        }
+
+    var nameFilterVal: String
+        get() = mSharedPrefsHelper.nameFilterVal
+        set(value) {
+            mSharedPrefsHelper.nameFilterVal = value
+        }
+
+    var macFilterVal: String
+        get() = mSharedPrefsHelper.macFilterVal
+        set(value) {
+            mSharedPrefsHelper.macFilterVal = value
+        }
+
     fun clear() {
         mSharedPrefsHelper.clear()
     }

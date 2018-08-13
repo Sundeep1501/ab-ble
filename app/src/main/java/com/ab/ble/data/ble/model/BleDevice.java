@@ -4,8 +4,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import com.polidea.rxandroidble.RxBleDevice;
-import com.polidea.rxandroidble.scan.ScanResult;
+import com.polidea.rxandroidble2.RxBleDevice;
+import com.polidea.rxandroidble2.scan.ScanResult;
 
 import java.util.Comparator;
 
